@@ -141,9 +141,9 @@ class JavaExecutor(CodeExecutor):
                 f.write(code + '\n\n')
                 f.write(test_harness)
             
-            # Compile Java code
+            # Compile Java code (Limit compiler memory to 128m)
             compile_result = subprocess.run(
-                [javac_cmd, 'Solution.java'],
+                [javac_cmd, '-J-Xmx128m', 'Solution.java'],
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
@@ -155,9 +155,9 @@ class JavaExecutor(CodeExecutor):
                 self._cleanup(temp_dir)
                 return False, '', f'Compilation Error:\n{compile_result.stderr}', execution_time
             
-            # Execute Java code
+            # Execute Java code (Limit runtime memory to 64m)
             run_result = subprocess.run(
-                ['java', '-Xmx128m', 'Main'],
+                ['java', '-Xmx64m', 'Main'],
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
