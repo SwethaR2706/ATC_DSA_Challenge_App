@@ -1,0 +1,36 @@
+{
+    "problem_id": 3,
+    "title": "Valid Palindrome",
+    "difficulty": "Easy",
+    "marks": 10,
+    "type": "logic_fix",
+    "description": "**LOGIC ERROR**: The code below runs but gives incorrect results. Find and fix the logical errors.\n\nA phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.\n\nGiven a string s, return true if it is a palindrome, or false otherwise.\n\nExample 1:\nInput: s = 'A man, a plan, a canal: Panama'\nOutput: true\nExplanation: 'amanaplanacanalpanama' is a palindrome.\n\nExample 2:\nInput: s = 'race a car'\nOutput: false\nExplanation: 'raceacar' is not a palindrome.\n\nExample 3:\nInput: s = ' '\nOutput: true\nExplanation: s is an empty string '' after removing non-alphanumeric characters.\nSince an empty string reads the same forward and backward, it is a palindrome.\n\nConstraints:\n- 1 <= s.length <= 2 * 10^5\n- s consists only of printable ASCII characters.",
+    "function_signature": {
+        "python": "def solution(s):",
+        "java": "public boolean solution(String s)"
+    },
+    "starter_code": {
+        "python": "def solution(s):\n    # Bug: Logic incorrect\n    filtered = ''\n    for char in s:\n        if char.isalnum():\n            filtered += char\n    # Forgot to lower case\n    return filtered == filtered[::-1]",
+        "java": "class Solution {\n    public boolean solution(String s) {\n        // Bug: Logic incorrect\n        StringBuilder filtered = new StringBuilder();\n        for (char c : s.toCharArray()) {\n            if (Character.isLetterOrDigit(c)) {\n                filtered.append(c);\n            }\n        }\n        // Forgot to lower case\n        String f = filtered.toString();\n        String r = filtered.reverse().toString();\n        return f.equals(r);\n    }\n}"
+    },
+    "test_cases": [
+        {
+            "input": {
+                "s": "A man, a plan, a canal: Panama"
+            },
+            "expected_output": true
+        },
+        {
+            "input": {
+                "s": "race a car"
+            },
+            "expected_output": false
+        },
+        {
+            "input": {
+                "s": " "
+            },
+            "expected_output": true
+        }
+    ]
+}
