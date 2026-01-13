@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from backend.service import ContestService
 import os
+import secrets
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'dsa-challenge-secure-key-2024')
 service = ContestService()
 
 @app.route('/')
