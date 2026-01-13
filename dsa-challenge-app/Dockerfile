@@ -1,13 +1,14 @@
-# Use an official Python runtime (Full version to avoid apt errors)
-FROM python:3.11
+# Use specific Debian Bookworm image for stability
+FROM python:3.11-bookworm
 
-# Install OpenJDK-17
-RUN apt-get update && \
-    apt-get install -y openjdk-17-jdk-headless && \
+# Install default Java (usually OpenJDK 17 on Bookworm)
+RUN apt-get update --fix-missing && \
+    apt-get install -y default-jdk-headless && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set JAVA_HOME environment variable
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+# Set JAVA_HOME (Default location for Debian)
+ENV JAVA_HOME /usr/lib/jvm/default-java
 
 # Set work directory
 WORKDIR /app
