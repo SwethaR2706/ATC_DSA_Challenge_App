@@ -117,7 +117,12 @@
     <div class="container">
         <header>
             <h1>🏆 Organizer Dashboard</h1>
-            <div id="lastUpdated" class="last-updated">Updating...</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button onclick="resetDatabase()"
+                    style="background-color: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">⚠️
+                    Reset Database</button>
+                <div id="lastUpdated" class="last-updated">Updating...</div>
+            </div>
         </header>
 
         <div class="card">
@@ -141,6 +146,24 @@
     </div>
 
     <script>
+        function resetDatabase() {
+            if (confirm("⚠️ DANGER: Are you sure you want to DELETE ALL DATA?\n\nThis will remove all participants, scores, and submissions.\nThis action cannot be undone.")) {
+                fetch('/secret/reset-db-now', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("✅ Database Cleared Successfully!");
+                            updateLeaderboard(); // Refresh empty table
+                        } else {
+                            alert("❌ Error: " + data.message);
+                        }
+                    })
+                    .catch(err => alert("❌ Error connecting to server"));
+            }
+        }
+
         function updateLeaderboard() {
             fetch('/api/organizer/data')
                 .then(response => response.json())

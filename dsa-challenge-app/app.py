@@ -183,3 +183,15 @@ def get_organizer_data():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False, port=5000)
+    
+# --- ADMIN UTILS (For cleanup) ---
+from backend.admin_utils import reset_db
+
+@app.route('/secret/reset-db-now')
+def reset_database_route():
+    """Secret route to wipe database"""
+    reset_db()
+    # Check if request wants JSON (AJAX) or HTML (Browser)
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': 'Database cleared successfully'})
+    return "<h1>Database CLEARED</h1><p>All participants and submissions have been deleted.</p><a href='/'>Go to Home</a>"
