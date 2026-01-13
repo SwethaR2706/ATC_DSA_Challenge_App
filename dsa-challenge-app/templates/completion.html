@@ -89,7 +89,7 @@
             <span class="icon">ℹ️</span>
             You can now close this window.
         </div>
-        <button onclick="if(window.pywebview){window.pywebview.api.quit_app()}"
+        <button onclick="if(window.pywebview){window.pywebview.api.quit_app()}else{window.close()}"
             style="margin-top: 20px; padding: 12px 24px; background: #da3633; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
             Close Application
         </button>

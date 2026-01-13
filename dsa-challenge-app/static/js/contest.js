@@ -298,7 +298,12 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
             })
         });
 
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (e) {
+            throw new Error("Server Error: Check your code or try again.");
+        }
 
         if (result.success) {
             if (result.verdict === 'Accepted') {
