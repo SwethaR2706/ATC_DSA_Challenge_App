@@ -24,7 +24,7 @@ PROBLEMS_DIR = os.path.join(DATA_DIR, 'problems')
 TOTAL_PROBLEMS = 10
 
 # Execution configuration
-EXECUTION_TIMEOUT = 10  # seconds (Increased for Cloud)
+EXECUTION_TIMEOUT = 30  # seconds (Generous for Cloud/Java startup)
 TEMP_DIR = os.path.join(DATA_DIR, 'temp')
 
 # Contest configuration
