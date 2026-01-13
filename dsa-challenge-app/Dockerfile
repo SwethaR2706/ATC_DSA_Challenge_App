@@ -1,11 +1,9 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Use an official Python runtime (Full version to avoid apt errors)
+FROM python:3.11
 
 # Install OpenJDK-17
-# mkdir is needed because slim images sometimes lack man page dirs, causing JDK install to fail
-RUN mkdir -p /usr/share/man/man1 && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-17-jdk-headless && \
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk-headless && \
     rm -rf /var/lib/apt/lists/*
 
 # Set JAVA_HOME environment variable
