@@ -167,10 +167,7 @@ def record_violation():
     result = service.record_violation(session['participant_id'])
     return jsonify(result)
 
-@app.route('/completion')
-def completion():
-    """Completion page"""
-    return render_template('completion.html')
+
 
 @app.route('/organizer')
 def organizer_view():
