@@ -157,7 +157,7 @@ class JavaExecutor(CodeExecutor):
             
             # Execute Java code
             run_result = subprocess.run(
-                ['java', '-Xmx256m', 'Main'],
+                ['java', '-Xmx128m', 'Main'],
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,

@@ -1,9 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from backend.service import ContestService
-import secrets
-
-app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)
+import os
 service = ContestService()
 
 @app.route('/')
