@@ -24,7 +24,7 @@ PROBLEMS_DIR = os.path.join(DATA_DIR, 'problems')
 TOTAL_PROBLEMS = 10
 
 # Execution configuration
-EXECUTION_TIMEOUT = 5  # seconds
+EXECUTION_TIMEOUT = 10  # seconds (Increased for Cloud)
 TEMP_DIR = os.path.join(DATA_DIR, 'temp')
 
 # Contest configuration
