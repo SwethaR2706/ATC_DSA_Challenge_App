@@ -113,15 +113,19 @@ class JavaExecutor(CodeExecutor):
                     javac_cmd = fallback_javac
                 else:
                     execution_time = time.time() - start_time
-                    error_msg = (
-                        "Java compiler (javac) not found in system PATH.\\n\\n"
-                        "To fix this:\\n"
-                        "1. Find your JDK installation (e.g., C:\\\\Program Files\\\\Java\\\\jdk1.8.0_441)\\n"
-                        "2. Add the 'bin' folder to your system PATH\\n"
-                        "3. Restart the application\\n\\n"
-                        "For now, please use Python language instead."
-                    )
-                    return False, '', error_msg, execution_time
+                if 'javac' in str(e):
+                    hint = "Java Compiler (javac) not found. If on Cloud, ensure Docker is used."
+                elif 'java' in str(e):
+                    hint = "Java Runtime (java) not found. If on Cloud, ensure Docker is used."
+                else:
+                    hint = "Check JDK installation."
+                
+                error_msg = (
+                    f"Java execution failed: {str(e)}\\n\\n"
+                    f"Hint: {hint}\\n"
+                    "Please contact the organizer."
+                )
+                return False, '', error_msg, execution_time
             
             # Create temporary directory for Java files
             temp_dir = tempfile.mkdtemp(dir=config.TEMP_DIR)

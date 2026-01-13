@@ -16,7 +16,7 @@ import time
 # OPTION 3 (Cloud): After you deploy to Render/Heroku/AWS, they will give you a public URL.
 # Paste that URL here.
 # Example: 'https://dsa-contest-app.onrender.com'
-BACKEND_URL = 'PLACEHOLDER_FOR_YOUR_CLOUD_URL' # <--- CHANGE THIS AFTER DEPLOYING BACKEND 
+BACKEND_URL = 'https://atc-dsa-challenge-app.onrender.com/' # <--- CHANGE THIS AFTER DEPLOYING BACKEND 
 
 class ClientApi:
     """

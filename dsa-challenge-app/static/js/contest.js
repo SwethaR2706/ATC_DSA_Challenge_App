@@ -439,11 +439,7 @@ function startTimer() {
 
 // Redirect to completion page
 function showCompletionMessage() {
-    // Exit native fullscreen and navigate via backend to ensure UI restores
-    if (window.pywebview) {
-        window.pywebview.api.end_contest_session();
-    } else {
-        // Fallback for browser testing
-        window.location.href = '/completion';
-    }
+    // Navigate to completion page
+    // We do not need special pywebview handling here for the cloud version
+    window.location.href = '/completion';
 }

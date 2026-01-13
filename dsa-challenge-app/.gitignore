@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / PyInstaller
+build/
+dist/
+*.spec
+*.exe
+*.pkg
+
+# Environment
+.env
+venv/
+env/
+.idea/
+.vscode/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
