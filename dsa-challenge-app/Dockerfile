@@ -2,9 +2,11 @@
 FROM python:3.11-slim
 
 # Install OpenJDK-17
-RUN apt-get update && \
-    apt-get install -y openjdk-17-jdk-headless && \
-    apt-get clean;
+# mkdir is needed because slim images sometimes lack man page dirs, causing JDK install to fail
+RUN mkdir -p /usr/share/man/man1 && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends openjdk-17-jdk-headless && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set JAVA_HOME environment variable
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
