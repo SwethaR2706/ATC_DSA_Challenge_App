@@ -160,6 +160,10 @@ class ContestService:
             
             submission = Submission(participant_id=participant_id, problem_id=problem_id, code=code, language=language, verdict=verdict, score=score)
             session.add(submission)
+            
+            # Update total score immediately
+            self._calculate_results(participant_id, session)
+            
             session.commit()
             
             submission_id = submission.id
