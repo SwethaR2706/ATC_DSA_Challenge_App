@@ -156,9 +156,23 @@ class ContestService:
                 session.close()
                 return {'success': False, 'message': 'Contest is not active', 'verdict': None, 'score': 0}
             
+            # Check if problem is already solved
+            solved_sub = session.query(Submission).filter_by(
+                participant_id=participant_id, 
+                problem_id=problem_id, 
+                verdict='Accepted'
+            ).first()
+            
+            already_solved = solved_sub is not None
+
             verdict, score, details = self.judge.judge_submission(problem_id, code, language)
             
-            submission = Submission(participant_id=participant_id, problem_id=problem_id, code=code, language=language, verdict=verdict, score=score)
+            # If already solved, do not give points again
+            final_score = score
+            if already_solved:
+                final_score = 0
+            
+            submission = Submission(participant_id=participant_id, problem_id=problem_id, code=code, language=language, verdict=verdict, score=final_score)
             session.add(submission)
             
             # Update total score immediately
@@ -169,11 +183,31 @@ class ContestService:
             submission_id = submission.id
             session.close()
             
-            return {'success': True, 'submission_id': submission_id, 'verdict': verdict, 'score': score, 'details': details}
+            return {
+                'success': True, 
+                'submission_id': submission_id, 
+                'verdict': verdict, 
+                'score': final_score, 
+                'details': details,
+                'already_solved': already_solved
+            }
+
         except Exception as e:
             session.rollback()
             session.close()
             return {'success': False, 'message': str(e), 'verdict': 'Error', 'score': 0}
+
+    def get_solved_problems(self, participant_id):
+        """Get list of IDs of problems solved by participant"""
+        session = get_session()
+        submissions = session.query(Submission.problem_id).filter_by(
+            participant_id=participant_id, 
+            verdict='Accepted'
+        ).distinct().all()
+        
+        solved_ids = [s[0] for s in submissions]
+        session.close()
+        return solved_ids
     
     def get_submissions(self, participant_id):
         """Get all submissions for a participant"""

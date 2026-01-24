@@ -50,6 +50,13 @@ def completion():
 def get_problems():
     """Get all problems"""
     problems = service.get_all_problems()
+    
+    # Inject solved status if logged in
+    if 'participant_id' in session:
+        solved_ids = service.get_solved_problems(session['participant_id'])
+        for problem in problems:
+            problem['solved'] = problem['problem_id'] in solved_ids
+            
     return jsonify(problems)
 
 @app.route('/api/problem/<int:problem_id>', methods=['GET'])

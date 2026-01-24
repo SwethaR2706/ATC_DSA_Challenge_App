@@ -1,60 +1,48 @@
 {
-  "problem_id": 1,
-  "title": "Two Sum",
-  "difficulty": "Easy",
-  "marks": 10,
-  "type": "syntax_fix",
-  "description": "**SYNTAX ERROR**: The code below contains syntax errors. Fix them so the solution compiles and runs correctly.\n\nGiven an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.\n\nExample 1:\nInput: nums = [2,7,11,15], target = 9\nOutput: [0,1]\nExplanation: Because nums[0] + nums[1] == 9, we return [0, 1].\n\nExample 2:\nInput: nums = [3,2,4], target = 6\nOutput: [1,2]\n\nConstraints:\n- 2 <= nums.length <= 10^4\n- -10^9 <= nums[i] <= 10^9\n- -10^9 <= target <= 10^9\n- Only one valid answer exists.",
-  "function_signature": {
-    "python": "def solution(nums, target):",
-    "java": "public int[] solution(int[] nums, int target)"
-  },
-  "starter_code": {
-    "python": "def solution(nums, target)\n    prev_map = {}\n    for i, n in enumerate(nums)\n    # Indentation Error\n    diff = target - n\n        if diff in prev_map:\n            return [prev_map[diff], i]\n        prev_map[n] = i\n    return []",
-    "java": "import java.util.HashMap;\n\nclass Solution {\n    public int[] solution(int[] nums, int target) {\n        HashMap<Integer, Integer> map = new HashMap<>()\n        \n        for (int i = 0; i < nums.length; i++) {\n            int diff = target - nums[i];\n            if (map.containsKey(diff)) {\n                return new int[] { map.get(diff), i };\n            }\n            map.put(nums[i], i);\n        }\n        return new int[0]\n    }\n}"
-  },
-  "test_cases": [
-    {
-      "input": {
-        "nums": [
-          2,
-          7,
-          11,
-          15
-        ],
-        "target": 9
-      },
-      "expected_output": [
-        0,
-        1
-      ]
+    "problem_id": 1,
+    "title": "Basic Array Sum",
+    "difficulty": "Easy",
+    "marks": 10,
+    "type": "algorithm",
+    "description": "Write a function that calculates the sum of all elements in an integer array.\n\n**Example:**\nInput: `nums = [1, 2, 3, 4, 5]`\nOutput: `15`\n\n**Constraints:**\n- `1 <= nums.length <= 1000`\n- `-100 <= nums[i] <= 100`",
+    "function_signature": {
+        "python": "def solution(nums):",
+        "java": "public int solution(int[] nums)"
     },
-    {
-      "input": {
-        "nums": [
-          3,
-          2,
-          4
-        ],
-        "target": 6
-      },
-      "expected_output": [
-        1,
-        2
-      ]
+    "starter_code": {
+        "python": "def solution(nums):\n    # Write your code here\n    pass",
+        "java": "class Solution {\n    public int solution(int[] nums) {\n        // Write your code here\n        return 0;\n    }\n}"
     },
-    {
-      "input": {
-        "nums": [
-          3,
-          3
-        ],
-        "target": 6
-      },
-      "expected_output": [
-        0,
-        1
-      ]
-    }
-  ]
+    "test_cases": [
+        {
+            "input": {
+                "nums": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            "expected_output": 15
+        },
+        {
+            "input": {
+                "nums": [
+                    10,
+                    -2,
+                    5
+                ]
+            },
+            "expected_output": 13
+        },
+        {
+            "input": {
+                "nums": [
+                    0
+                ]
+            },
+            "expected_output": 0
+        }
+    ]
 }

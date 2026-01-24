@@ -4,6 +4,12 @@ import tempfile
 import json
 import config
 import time
+import threading
+
+# Global lock to prevent concurrent heavy executions (Free Tier Optimization)
+# This ensures only 1 "Run/Judge" happens at a time to stay under 512MB RAM
+_EXECUTION_LOCK = threading.Semaphore(1)
+
 
 class CodeExecutor:
     """Base class for code execution"""
@@ -24,65 +30,67 @@ class PythonExecutor(CodeExecutor):
         Execute Python code with test input
         Returns: (success, output, error, execution_time)
         """
-        start_time = time.time()
-        temp_file = None
-        
-        try:
-            # Check syntax first for clean error messages
-            import ast
+        # Acquire global lock to prevent server crash
+        with _EXECUTION_LOCK:
+            start_time = time.time()
+            temp_file = None
+            
             try:
-                ast.parse(code)
-            except SyntaxError as e:
-                return False, '', f"Syntax Error: {e.msg} (Line {e.lineno})", 0.0
+                # Check syntax first for clean error messages
+                import ast
+                try:
+                    ast.parse(code)
+                except SyntaxError as e:
+                    return False, '', f"Syntax Error: {e.msg} (Line {e.lineno})", 0.0
 
-            # Create temporary file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
-                temp_file = f.name
+                # Create temporary file
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+                    temp_file = f.name
+                    
+                    # Write user code and test invocation
+                    f.write(code + '\n\n')
+                    f.write('# Test execution\n')
+                    f.write('import json\n')
+                    f.write('import sys\n')
+                    f.write(f'test_input = {json.dumps(test_input)}\n')
+                    f.write('try:\n')
+                    f.write('    result = solution(**test_input)\n')
+                    f.write('    print(json.dumps(result), file=sys.stdout)\n')  # Only print result
+                    f.write('except Exception as e:\n')
+                    f.write('    print(str(e), file=sys.stderr)\n')
+                    f.write('    sys.exit(1)\n')
                 
-                # Write user code and test invocation
-                f.write(code + '\n\n')
-                f.write('# Test execution\n')
-                f.write('import json\n')
-                f.write('import sys\n')
-                f.write(f'test_input = {json.dumps(test_input)}\n')
-                f.write('try:\n')
-                f.write('    result = solution(**test_input)\n')
-                f.write('    print(json.dumps(result), file=sys.stdout)\n')  # Only print result
-                f.write('except Exception as e:\n')
-                f.write('    print(str(e), file=sys.stderr)\n')
-                f.write('    sys.exit(1)\n')
-            
-            # Execute Python code
-            result = subprocess.run(
-                ['python', temp_file],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout,
-                cwd=config.TEMP_DIR
-            )
-            
-            execution_time = time.time() - start_time
-            
-            # Clean up
-            if temp_file and os.path.exists(temp_file):
-                os.unlink(temp_file)
-            
-            if result.returncode == 0:
-                return True, result.stdout.strip(), '', execution_time
-            else:
-                return False, '', result.stderr.strip(), execution_time
+                # Execute Python code
+                result = subprocess.run(
+                    ['python', temp_file],
+                    capture_output=True,
+                    text=True,
+                    timeout=self.timeout,
+                    cwd=config.TEMP_DIR
+                )
                 
-        except subprocess.TimeoutExpired:
-            execution_time = time.time() - start_time
-            if temp_file and os.path.exists(temp_file):
-                os.unlink(temp_file)
-            return False, '', 'Time Limit Exceeded', execution_time
-            
-        except Exception as e:
-            execution_time = time.time() - start_time
-            if temp_file and os.path.exists(temp_file):
-                os.unlink(temp_file)
-            return False, '', str(e), execution_time
+                execution_time = time.time() - start_time
+                
+                # Clean up
+                if temp_file and os.path.exists(temp_file):
+                    os.unlink(temp_file)
+                
+                if result.returncode == 0:
+                    return True, result.stdout.strip(), '', execution_time
+                else:
+                    return False, '', result.stderr.strip(), execution_time
+                    
+            except subprocess.TimeoutExpired:
+                execution_time = time.time() - start_time
+                if temp_file and os.path.exists(temp_file):
+                    os.unlink(temp_file)
+                return False, '', 'Time Limit Exceeded', execution_time
+                
+            except Exception as e:
+                execution_time = time.time() - start_time
+                if temp_file and os.path.exists(temp_file):
+                    os.unlink(temp_file)
+                return False, '', str(e), execution_time
 
 
 class JavaExecutor(CodeExecutor):
@@ -93,96 +101,98 @@ class JavaExecutor(CodeExecutor):
         Execute Java code with test input
         Returns: (success, output, error, execution_time)
         """
-        start_time = time.time()
-        temp_dir = None
-        
-        try:
-            # Check if javac is available
-            javac_cmd = 'javac'
+        # Acquire global lock to prevent server crash
+        with _EXECUTION_LOCK:
+            start_time = time.time()
+            temp_dir = None
+            
             try:
-                subprocess.run(
-                    [javac_cmd, '-version'],
+                # Check if javac is available
+                javac_cmd = 'javac'
+                try:
+                    subprocess.run(
+                        [javac_cmd, '-version'],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                except FileNotFoundError:
+                    # Try specific detected path
+                    fallback_javac = r"C:\Program Files\Java\jdk-1.8\bin\javac.exe"
+                    if os.path.exists(fallback_javac):
+                        javac_cmd = fallback_javac
+                    else:
+                        execution_time = time.time() - start_time
+                        if 'javac' in str(e):
+                            hint = "Java Compiler (javac) not found. If on Cloud, ensure Docker is used."
+                        elif 'java' in str(e):
+                            hint = "Java Runtime (java) not found. If on Cloud, ensure Docker is used."
+                        else:
+                            hint = "Check JDK installation."
+                        
+                        error_msg = (
+                            f"Java execution failed: {str(e)}\\n"
+                            f"Hint: {hint}\\n"
+                            "Please contact the organizer."
+                        )
+                        return False, '', error_msg, execution_time
+                
+                # Create temporary directory for Java files
+                temp_dir = tempfile.mkdtemp(dir=config.TEMP_DIR)
+                java_file = os.path.join(temp_dir, 'Solution.java')
+                
+                # Generate test harness based on input parameters
+                test_harness = self._generate_test_harness(test_input)
+                
+                # Write complete Java program with proper newlines
+                with open(java_file, 'w', encoding='utf-8') as f:
+                    f.write('import java.util.*;\n')
+                    f.write('import java.lang.reflect.*;\n\n')
+                    f.write(code + '\n\n')
+                    f.write(test_harness)
+                
+                # Compile Java code (Limit compiler memory to 128m)
+                compile_result = subprocess.run(
+                    [javac_cmd, '-J-Xmx128m', 'Solution.java'],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=self.timeout,
+                    cwd=temp_dir
                 )
-            except FileNotFoundError:
-                # Try specific detected path
-                fallback_javac = r"C:\Program Files\Java\jdk-1.8\bin\javac.exe"
-                if os.path.exists(fallback_javac):
-                    javac_cmd = fallback_javac
-                else:
-                    execution_time = time.time() - start_time
-                if 'javac' in str(e):
-                    hint = "Java Compiler (javac) not found. If on Cloud, ensure Docker is used."
-                elif 'java' in str(e):
-                    hint = "Java Runtime (java) not found. If on Cloud, ensure Docker is used."
-                else:
-                    hint = "Check JDK installation."
                 
-                error_msg = (
-                    f"Java execution failed: {str(e)}\\n\\n"
-                    f"Hint: {hint}\\n"
-                    "Please contact the organizer."
+                if compile_result.returncode != 0:
+                    execution_time = time.time() - start_time
+                    self._cleanup(temp_dir)
+                    return False, '', f'Compilation Error:\n{compile_result.stderr}', execution_time
+                
+                # Execute Java code (Limit runtime memory to 64m)
+                run_result = subprocess.run(
+                    ['java', '-Xmx64m', 'Main'],
+                    capture_output=True,
+                    text=True,
+                    timeout=self.timeout,
+                    cwd=temp_dir
                 )
-                return False, '', error_msg, execution_time
-            
-            # Create temporary directory for Java files
-            temp_dir = tempfile.mkdtemp(dir=config.TEMP_DIR)
-            java_file = os.path.join(temp_dir, 'Solution.java')
-            
-            # Generate test harness based on input parameters
-            test_harness = self._generate_test_harness(test_input)
-            
-            # Write complete Java program with proper newlines
-            with open(java_file, 'w', encoding='utf-8') as f:
-                f.write('import java.util.*;\n')
-                f.write('import java.lang.reflect.*;\n\n')
-                f.write(code + '\n\n')
-                f.write(test_harness)
-            
-            # Compile Java code (Limit compiler memory to 128m)
-            compile_result = subprocess.run(
-                [javac_cmd, '-J-Xmx128m', 'Solution.java'],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout,
-                cwd=temp_dir
-            )
-            
-            if compile_result.returncode != 0:
+                
+                execution_time = time.time() - start_time
+                
+                # Clean up
+                self._cleanup(temp_dir)
+                
+                if run_result.returncode == 0:
+                    return True, run_result.stdout.strip(), '', execution_time
+                else:
+                    return False, '', run_result.stderr.strip(), execution_time
+                    
+            except subprocess.TimeoutExpired:
                 execution_time = time.time() - start_time
                 self._cleanup(temp_dir)
-                return False, '', f'Compilation Error:\n{compile_result.stderr}', execution_time
-            
-            # Execute Java code (Limit runtime memory to 64m)
-            run_result = subprocess.run(
-                ['java', '-Xmx64m', 'Main'],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout,
-                cwd=temp_dir
-            )
-            
-            execution_time = time.time() - start_time
-            
-            # Clean up
-            self._cleanup(temp_dir)
-            
-            if run_result.returncode == 0:
-                return True, run_result.stdout.strip(), '', execution_time
-            else:
-                return False, '', run_result.stderr.strip(), execution_time
+                return False, '', 'Time Limit Exceeded', execution_time
                 
-        except subprocess.TimeoutExpired:
-            execution_time = time.time() - start_time
-            self._cleanup(temp_dir)
-            return False, '', 'Time Limit Exceeded', execution_time
-            
-        except Exception as e:
-            execution_time = time.time() - start_time
-            self._cleanup(temp_dir)
-            return False, '', str(e), execution_time
+            except Exception as e:
+                execution_time = time.time() - start_time
+                self._cleanup(temp_dir)
+                return False, '', str(e), execution_time
     
     def _generate_test_harness(self, test_input):
         """Generate Java test harness based on input parameters"""

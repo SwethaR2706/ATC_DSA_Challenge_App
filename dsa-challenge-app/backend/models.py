@@ -61,7 +61,16 @@ class Result(Base):
 
 # Database initialization
 # config.SQLALCHEMY_DATABASE_URI handles both SQLite and Postgres
-engine = create_engine(config.SQLALCHEMY_DATABASE_URI, echo=False)
+engine_args = {}
+if 'postgresql' in config.SQLALCHEMY_DATABASE_URI:
+    engine_args = {
+        'pool_size': 10,
+        'max_overflow': 20,
+        'pool_timeout': 30,
+        'pool_recycle': 1800
+    }
+
+engine = create_engine(config.SQLALCHEMY_DATABASE_URI, echo=False, **engine_args)
 SessionLocal = sessionmaker(bind=engine)
 
 def init_db():

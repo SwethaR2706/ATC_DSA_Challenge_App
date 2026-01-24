@@ -2,6 +2,7 @@ import webview
 import sys
 import threading
 import time
+import os
 
 # --- EXPLANATION FOR THE USER ---
 # This script is the "Client". It runs on the Participant's machine.
@@ -33,6 +34,7 @@ class ClientApi:
     def quit_app(self):
         if self._window:
             self._window.destroy()
+        os._exit(0)
 
     def set_fullscreen(self, enable):
         if self._window:

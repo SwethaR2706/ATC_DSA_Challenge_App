@@ -163,7 +163,27 @@ async function loadProblems() {
         problems.forEach(problem => {
             const item = document.createElement('div');
             item.className = 'problem-item';
-            item.textContent = `${problem.problem_id}. ${problem.title}`;
+
+            // Create simplified difficulty class (lowercase)
+            const difficultyClass = problem.difficulty ? problem.difficulty.toLowerCase() : 'easy';
+
+            // Checkmark if solved
+            const solvedIcon = problem.solved ? '<span class="solved-icon">✓</span>' : '';
+            const solvedClass = problem.solved ? 'solved' : '';
+
+            // Add HTML with badge
+            item.innerHTML = `
+                <div class="problem-info">
+                    ${solvedIcon}
+                    <span class="problem-name">${problem.problem_id}. ${problem.title}</span>
+                </div>
+                <span class="difficulty-badge ${difficultyClass}">${problem.difficulty}</span>
+            `;
+
+            if (problem.solved) {
+                item.classList.add('solved');
+            }
+
             item.onclick = () => loadProblem(problem.problem_id);
             problemList.appendChild(item);
         });
@@ -234,11 +254,18 @@ function hideError() {
 document.getElementById('runBtn').addEventListener('click', async () => {
     const code = document.getElementById('codeEditor').value.trim();
     const language = document.getElementById('language').value;
+    const runBtn = document.getElementById('runBtn');
+    const submitBtn = document.getElementById('submitBtn');
 
     if (!code) {
         showResult('Please write some code before running', 'error');
         return;
     }
+
+    // Disable buttons
+    runBtn.disabled = true;
+    submitBtn.disabled = true;
+    runBtn.textContent = 'Running...';
 
     showResult('Running...', 'info');
     hideError();
@@ -271,18 +298,31 @@ document.getElementById('runBtn').addEventListener('click', async () => {
     } catch (error) {
         showResult(`✗ Error`, 'error');
         showError(error.message);
+    } finally {
+        // Re-enable buttons
+        runBtn.disabled = false;
+        submitBtn.disabled = false;
+        runBtn.textContent = 'Run Code';
     }
 });
 
 // Submit code
+// Submit code
 document.getElementById('submitBtn').addEventListener('click', async () => {
     const code = document.getElementById('codeEditor').value.trim();
     const language = document.getElementById('language').value;
+    const runBtn = document.getElementById('runBtn');
+    const submitBtn = document.getElementById('submitBtn');
 
     if (!code) {
         showResult('Please write some code before submitting', 'error');
         return;
     }
+
+    // Disable buttons
+    runBtn.disabled = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Judging...';
 
     showResult('Judging...', 'info');
     hideError();
@@ -307,8 +347,26 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
 
         if (result.success) {
             if (result.verdict === 'Accepted') {
-                showResult(`✓ ${result.verdict} (+${result.score} marks)`, 'success');
-                updateScore();
+                const marksMsg = result.already_solved ? '(Already Solved)' : `(+${result.score} marks)`;
+                const statusType = result.already_solved ? 'info' : 'success';
+
+                showResult(`✓ ${result.verdict} ${marksMsg}`, statusType);
+                if (!result.already_solved) {
+                    updateScore();
+                }
+
+                // Mark current problem as solved in sidebar
+                const currentItem = document.querySelector(`.problem-item:nth-child(${currentProblemId})`);
+                if (currentItem && !currentItem.classList.contains('solved')) {
+                    currentItem.classList.add('solved');
+                    const infoDiv = currentItem.querySelector('.problem-info');
+                    if (infoDiv && !infoDiv.querySelector('.solved-icon')) {
+                        const icon = document.createElement('span');
+                        icon.className = 'solved-icon';
+                        icon.textContent = '✓';
+                        infoDiv.insertBefore(icon, infoDiv.firstChild);
+                    }
+                }
 
                 // Auto-advance to next problem
                 setTimeout(() => {
@@ -329,6 +387,11 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     } catch (error) {
         showResult(`✗ Error`, 'error');
         showError(error.message);
+    } finally {
+        // Re-enable buttons
+        runBtn.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Solution';
     }
 });
 

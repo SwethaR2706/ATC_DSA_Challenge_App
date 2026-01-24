@@ -34,7 +34,7 @@ def test_problem_loader():
     """Test problem loading"""
     print("\nTesting problem loader...")
     problems = load_all_problems()
-    assert len(problems) == 10, f"Expected 10 problems, got {len(problems)}"
+    assert len(problems) == config.TOTAL_PROBLEMS, f"Expected {config.TOTAL_PROBLEMS} problems, got {len(problems)}"
     print(f"[OK] Loaded {len(problems)} problems")
     for prob in problems:
         print(f"  - Problem {prob['problem_id']}: {prob['title']}")
@@ -69,15 +69,10 @@ def test_judge():
     print("\nTesting judge...")
     judge = Judge()
     
-    # Correct solution for Problem 1 (Two Sum)
+    # Correct solution for Problem 1 (Basic Array Sum)
     code = """
-def solution(nums, target):
-    seen = {}
-    for i, num in enumerate(nums):
-        if target - num in seen:
-            return [seen[target - num], i]
-        seen[num] = i
-    return []
+def solution(nums):
+    return sum(nums)
 """
     
     verdict, score, details = judge.judge_submission(1, code, "python")

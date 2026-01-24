@@ -1,66 +1,50 @@
 {
     "problem_id": 2,
-    "title": "Reverse String",
+    "title": "Find Maximum Element",
     "difficulty": "Easy",
     "marks": 10,
-    "type": "syntax_fix",
-    "description": "**SYNTAX ERROR**: The code below contains syntax errors. Fix them so the solution compiles and runs correctly.\n\nWrite a function that reverses a string. The input string is given as an array of characters s.\n\nYou must do this by modifying the input array in-place with O(1) extra memory.\n\nExample 1:\nInput: s = ['h','e','l','l','o']\nOutput: ['o','l','l','e','h']\n\nExample 2:\nInput: s = ['H','a','n','n','a','h']\nOutput: ['h','a','n','n','a','H']\n\nConstraints:\n- 1 <= s.length <= 10^5\n- s[i] is a printable ascii character.",
+    "type": "algorithm",
+    "description": "Given an array of integers `nums`, find and return the maximum element.\n\n**Example:**\nInput: `nums = [3, 1, 4, 1, 5, 9]`\nOutput: `9`\n\n**Constraints:**\n- `1 <= nums.length <= 1000`\n- `-10^4 <= nums[i] <= 10^4`",
     "function_signature": {
-        "python": "def solution(s):",
-        "java": "public void solution(char[] s)"
+        "python": "def solution(nums):",
+        "java": "public int solution(int[] nums)"
     },
     "starter_code": {
-        "python": "def solution(s):\n    left, right = 0, len(s) - 1\n    while left < right\n        s[left], s[right] = s[right], s[left]\n        left += 1\n        right -= 1\n    return s",
-        "java": "class Solution {\n    public void solution(char[] s) {\n        int left = 0;\n        int right = s.length - 1;\n        while (left < right) {\n            char tmp = s[left];\n            s[left] = s[right]\n            s[right] = tmp;\n            left++;\n            right--;\n        }\n    }\n}"
+        "python": "def solution(nums):\n    # Write your code here\n    pass",
+        "java": "class Solution {\n    public int solution(int[] nums) {\n        // Write your code here\n        return 0;\n    }\n}"
     },
     "test_cases": [
         {
             "input": {
-                "s": [
-                    "h",
-                    "e",
-                    "l",
-                    "l",
-                    "o"
+                "nums": [
+                    3,
+                    1,
+                    4,
+                    1,
+                    5,
+                    9
                 ]
             },
-            "expected_output": [
-                "o",
-                "l",
-                "l",
-                "e",
-                "h"
-            ]
+            "expected_output": 9
         },
         {
             "input": {
-                "s": [
-                    "H",
-                    "a",
-                    "n",
-                    "n",
-                    "a",
-                    "h"
+                "nums": [
+                    -10,
+                    -5,
+                    -2,
+                    -8
                 ]
             },
-            "expected_output": [
-                "h",
-                "a",
-                "n",
-                "n",
-                "a",
-                "H"
-            ]
+            "expected_output": -2
         },
         {
             "input": {
-                "s": [
-                    "A"
+                "nums": [
+                    7
                 ]
             },
-            "expected_output": [
-                "A"
-            ]
+            "expected_output": 7
         }
     ]
 }

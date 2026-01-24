@@ -20,5 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Run the application
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--timeout", "120"]
+# Run the application using shell to allow variable expansion
+# Default to 2 workers, but can be overridden by WEB_CONCURRENCY env var
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-10000} --workers ${WEB_CONCURRENCY:-2} --threads 8 --timeout 120"]
