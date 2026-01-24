@@ -236,6 +236,22 @@ document.getElementById('language').addEventListener('change', () => {
     }
 });
 
+// Enable Tab indentation in textarea
+document.getElementById('codeEditor').addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+
+        // Insert 4 spaces
+        this.value = this.value.substring(0, start) +
+            "    " + this.value.substring(end);
+
+        // Put caret at right position
+        this.selectionStart = this.selectionEnd = start + 4;
+    }
+});
+
 // Show error in separate panel
 function showError(errorMessage) {
     const errorPanel = document.getElementById('errorPanel');
